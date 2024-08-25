@@ -33,7 +33,9 @@ jobs:
 
     - name: Terraform Plan
       id: terraform-plan
-      run: terraform plan -detailed-exitcode
+      run: |
+        terraform plan -detailed-exitcode -out=tfplan
+        echo "PLAN_EXIT_CODE=$?" >> $GITHUB_ENV
       working-directory: ./Infra
 
     - name: Report Drift
