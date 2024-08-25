@@ -40,11 +40,15 @@ jobs:
 
     - name: Report Drift
       run: |
+        # Debug: Show the plan output file
+        echo "Plan output:"
+        cat plan_output.txt
+    
         # Count the number of changes in the plan output
-        ADDITIONS=$(grep -c "Plan: [0-9]* to add" plan_output.txt)
-        CHANGES=$(grep -c "Plan: [0-9]* to change" plan_output.txt)
-        DESTROY=$(grep -c "Plan: [0-9]* to destroy" plan_output.txt)
-
+        ADDITIONS=$(grep -oP "Plan: \K[0-9]+(?= to add)" plan_output.txt || echo 0)
+        CHANGES=$(grep -oP "Plan: \K[0-9]+(?= to change)" plan_output.txt || echo 0)
+        DESTROY=$(grep -oP "Plan: \K[0-9]+(?= to destroy)" plan_output.txt || echo 0)
+    
         echo "Additions: $ADDITIONS"
         echo "Changes: $CHANGES"
         echo "Destroy: $DESTROY"
