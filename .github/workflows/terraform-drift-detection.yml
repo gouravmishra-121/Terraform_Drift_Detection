@@ -50,4 +50,4 @@ jobs:
         else
           echo "No drift detected."
         fi
-       working-directory: ./Infra
+      working-directory: ./Infra
