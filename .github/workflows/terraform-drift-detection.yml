@@ -52,18 +52,16 @@ jobs:
         echo "Additions: $ADDITIONS"
         echo "Changes: $CHANGES"
         echo "Destroy: $DESTROY"
-
+    
         # Report based on the number of changes
-        if [ "$ADDITIONS" -eq 0 ] && [ "$CHANGES" -eq 0 ] && [ "$DESTROY" -eq 0 ]; then
-          echo "No drift detected."
-        elif [ "$CHANGES" -gt 0 ]; then
+        if [ "$CHANGES" -gt 0 ]; then
           echo "Drift detected: $CHANGES resource(s) to change."
           exit 1
-        elif [ "$ADDITIONS" -gt 0 ]; then
-          echo "Drift detected: $ADDITIONS resource(s) to Add."
+        elif [ "$ADDITIONS" -gt 0 ] || [ "$DESTROY" -gt 0 ]; then
+          echo "Resources will be added or destroyed, but no changes detected."
           exit 1
         else
-          echo "Unexpected output"
-          exit 1
+          echo "No drift detected."
         fi
       working-directory: ./Infra
+    
