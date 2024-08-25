@@ -34,22 +34,28 @@ jobs:
     - name: Terraform Plan
       id: terraform-plan
       run: |
-        terraform plan -refresh-only -detailed-exitcode -out=tfplan || true
-        PLAN_EXIT_CODE=$?
-        echo "PLAN_EXIT_CODE=$PLAN_EXIT_CODE" >> $GITHUB_ENV
+        terraform plan -detailed-exitcode -out=tfplan > plan_output.txt || true
+        cat plan_output.txt
       working-directory: ./Infra
-    
 
     - name: Report Drift
       run: |
-        echo "Plan exit code: $PLAN_EXIT_CODE"
-        if [ $PLAN_EXIT_CODE -eq 1 ]; then
-          echo "Terraform plan failed with an error."
+        # Count the number of changes in the plan output
+        ADDITIONS=$(grep -c "Plan: [0-9]* to add" plan_output.txt)
+        CHANGES=$(grep -c "Plan: [0-9]* to change" plan_output.txt)
+        DESTROY=$(grep -c "Plan: [0-9]* to destroy" plan_output.txt)
+
+        # Report based on the number of changes
+        if [ "$ADDITIONS" -eq 0 ] && [ "$CHANGES" -eq 0 ] && [ "$DESTROY" -eq 0 ]; then
+          echo "No drift detected."
+        elif [ "$CHANGES" -gt 0 ]; then
+          echo "Drift detected: $CHANGES resource(s) to change."
           exit 1
-        elif [ $PLAN_EXIT_CODE -eq 2 ]; then
-          echo "Terraform plan detected drift (changes)."
+        elif [ "$ADDITIONS" -gt 0 ]; then
+          echo "Drift detected: $ADDITIONS resource(s) to Add."
           exit 1
         else
-          echo "No drift detected."
+          echo "Unexpected output"
+          exit 1
         fi
       working-directory: ./Infra
