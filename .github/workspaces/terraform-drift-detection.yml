@@ -1,0 +1,48 @@
+name: Terraform Drift Detection
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: infra
+
+    - name: Terraform Plan
+      id: terraform-plan
+      run: terraform plan -detailed-exitcode
+      working-directory: infra
+
+    - name: Report Drift
+      run: |
+        if [ ${{ steps.terraform-plan.outcome }} -eq 1 ]; then
+          echo "Terraform plan failed with an error."
+          exit 1
+        elif [ ${{ steps.terraform-plan.outcome }} -eq 2 ]; then
+          echo "Terraform plan detected drift (changes)."
+          exit 1
+        else
+          echo "No drift detected."
+        fi
+      working-directory: infra
