@@ -40,13 +40,14 @@ jobs:
 
     - name: Report Drift
       run: |
-        if [ ${{ steps.terraform-plan.outcome }} -eq 1 ]; then
+        echo "Plan exit code: $PLAN_EXIT_CODE"
+        if [ $PLAN_EXIT_CODE -eq 1 ]; then
           echo "Terraform plan failed with an error."
           exit 1
-        elif [ ${{ steps.terraform-plan.outcome }} -eq 2 ]; then
+        elif [ $PLAN_EXIT_CODE -eq 2 ]; then
           echo "Terraform plan detected drift (changes)."
           exit 1
         else
           echo "No drift detected."
         fi
-      working-directory: ./Infra
+       working-directory: ./Infra
