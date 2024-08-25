@@ -27,12 +27,12 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-      working-directory: infra
+      working-directory: ./Infra
 
     - name: Terraform Plan
       id: terraform-plan
       run: terraform plan -detailed-exitcode
-      working-directory: infra
+      working-directory: ./Infra
 
     - name: Report Drift
       run: |

@@ -24,19 +24,19 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./infra
+        working-directory: ./Infra
 
       - name: Terraform Plan
         id: plan
         run: terraform plan -out=tfplan
-        working-directory: ./infra
+        working-directory: ./Infra
 
       - name: Terraform Apply
         if: ${{ steps.plan.outcome == 'success' }}
         run: terraform apply -auto-approve tfplan
-        working-directory: ./infra
+        working-directory: ./Infra
 
       - name: Terraform Outputs
         if: ${{ steps.plan.outcome == 'success' }}
         run: terraform output
-        working-directory: ./infra
+        working-directory: ./Infra
