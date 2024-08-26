@@ -34,7 +34,7 @@ jobs:
     - name: Terraform Plan
       id: terraform-plan
       run: |
-        terraform plan -detailed-exitcode -out=tfplan > plan_output.txt || true
+        terraform plan -refresh-only -out=tfplan > plan_output.txt 
         cat plan_output.txt
       working-directory: ./Infra
 
@@ -44,7 +44,7 @@ jobs:
         echo "Plan output:"
         cat plan_output.txt
 
-        line=$(grep -oE '[0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy' your_file.txt)
+        line=$(grep -oE '[0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy' plan_output.txt)
 
         add_count=$(echo $line | awk -F ' ' '{print $1}')
         change_count=$(echo $line | awk -F ' ' '{print $4}')
