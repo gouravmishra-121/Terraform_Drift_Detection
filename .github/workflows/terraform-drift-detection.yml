@@ -45,23 +45,31 @@ jobs:
           echo "No drift detected."
           exit 0  # Exit successfully
         fi
-        line=$(grep -oE '[0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy' plan_output.txt)
-
-        add_count=$(echo $line | awk -F ' ' '{print $1}')
-        change_count=$(echo $line | awk -F ' ' '{print $4}')
-        destroy_count=$(echo $line | awk -F ' ' '{print $7}')
-
-        echo "Add: $add_count, Change: $change_count, Destroy: $destroy_count"
     
-        # Report based on the number of changes
-        if [ "$change_count" -gt 0 ]; then 
-          echo "Drift detected: $change_count resource(s) to change."
-          exit 1
-        elif [ "$add_count" -gt 0 ]; then
-          echo "Drift detected: $add_count resource(s) to add."
-          exit 1
+        # Extract the line with the counts
+        line=$(grep -oE '[0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy' plan_output.txt || true)
+    
+        # Check if the line is not empty
+        if [ -n "$line" ]; then
+          add_count=$(echo $line | awk -F ' ' '{print $1}')
+          change_count=$(echo $line | awk -F ' ' '{print $4}')
+          destroy_count=$(echo $line | awk -F ' ' '{print $7}')
+    
+          echo "Add: $add_count, Change: $change_count, Destroy: $destroy_count"
+    
+          # Report based on the number of changes
+          if [ "$change_count" -gt 0 ]; then 
+            echo "Drift detected: $change_count resource(s) to change."
+            exit 1
+          elif [ "$add_count" -gt 0 ]; then
+            echo "Drift detected: $add_count resource(s) to add."
+            exit 1
+          else
+            echo "No drift detected."
+          fi
         else
           echo "No drift detected."
         fi
       working-directory: ./Infra
+    
     
